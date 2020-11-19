@@ -136,7 +136,6 @@ function generateFeedback(){
 
     if ( userAnswer === correctAnswer){
       store.score ++;
-console.log(store.score);
     return `<section>
           <h3 class=yourAnswer'>Well done! See here everyone, ${store.userName}'s done it!</h3>
           <button id= 'continue'>Continue</button>
@@ -158,9 +157,7 @@ console.log(store.score);
 
 //  Results screen after quiz is complete
 function generateResults(){
-console.log('generating results');
   if (store.score >= 3){
-console.log('more than 3');
     return `<section id="results">
     <h2 class='finalResults'>You got ${store.score} out of ${store.questions.length} correct!</h2>
       <h3 class='howdYouDo'>Yer a WIZARD, ${store.userName}!</h3>
@@ -170,7 +167,6 @@ console.log('more than 3');
   <div><img src="images/win.jpg" alt="Three young wizards facing the camera."></div>`
 
   } else {
-console.log('bad score');
     return `<section id="results">
         <h2 class='finalResults'>You got ${store.score} out of ${store.questions.length} correct!</h2>
           <h3 class='howdYouDo'>Let me guess -- you're secretly a wizard who was raised by muggles?</h3>
@@ -191,7 +187,6 @@ function handleStart(){
     store.quizStarted = true;
 
     store.userName = $('input[type="text"]').val();
-console.log('start clicked')
     render();
   });
 }
@@ -199,12 +194,9 @@ console.log('start clicked')
 function handleAnswer(){
   $('main').on('submit', '#question', function(event){
     event.preventDefault();
-console.log('submit clicked');
 let userAnswer = $('input[name="answer"]:checked').attr('id');
 let currentQuestion= store.questionNumber;
 let correctAnswer = store.questions[store.questionNumber].correctAnswer;
-console.log(`on question ${currentQuestion}`);
-console.log(`${store.userName} selected ${userAnswer}, the correct answer was ${correctAnswer}`);
     store.activateFeedback = true;
     render();
   });
@@ -213,7 +205,6 @@ console.log(`${store.userName} selected ${userAnswer}, the correct answer was ${
 function handleContinue(){
   $('main').on('click', '#continue', function(event){
     event.preventDefault();
-console.log('continue clicked');
      store.questionNumber++;
      store.activateFeedback = false;
     render();
@@ -223,7 +214,6 @@ console.log('continue clicked');
 function handleReplay(){
   $('main').on('click', '#playAgain', function(event){
     event.preventDefault();
-console.log('resetting');
 
     store.quizStarted= false,
     store.questionNumber= 0,
@@ -239,22 +229,17 @@ console.log('resetting');
 //This function conditionally replaces the contents of the <main> tag based on the state of the store
 
 function render(){
-console.log('render ran')
   let html = '';
   if (store.quizStarted === false){
     html = generateTitle();
-console.log('generateTitle');
 
   } else if (store.quizStarted === true && store.activateFeedback === false && store.questionNumber < store.questions.length){
     html = generateQuestion();
-console.log('generateQuestion');
 
   } else if (store.activateFeedback === true){
     html = generateFeedback();
-console.log('generateFeedback');
   
   } else if (store.quizStarted === true && store.questionNumber === store.questions.length){
-console.log('generateResults');
     html = generateResults();
   }
   
