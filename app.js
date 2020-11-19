@@ -40,8 +40,8 @@ const store = {
     {
       question: 'What is the core of Harry’s wand?',
       answers: [
+        'Unicorn Tail Hair',
 		    'Phoenix Feather',
-		    'Unicorn Tail Hair',
 		    'Dragon Heartstring',
         'Mermaid Scales'
       ],
@@ -72,103 +72,204 @@ const store = {
   ],
   quizStarted: false,
   questionNumber: 0,
-  score: 0
+  score: 0,
+  userName: '',
+  activateFeedback: false
 };
-
-/********** RENDER FUNCTION(S) **********/
- /* Your app should include a render() function, that regenerates the view each time the store is updated. 
-  * This function conditionally replaces the contents of the <main> tag based on the state of the store
-  *
-  * render title screen -
-  *   if store.quizStarted = false
-  *   generate html ~
-  *     h1 title text
-  *     Start button
-  */
-function renderTitle(){
-
-/* 
-    <section>
-      <h2>Welcome to Hogwarts!</h2>
-    </section>
-    <section>
-      <button class="startButton">Begin</button>
-    </section>
-*/
-}
-
-/* render question page -
- *   event listener for button click
- *   loop through store 
- *   generate html for 1st question ~
- *     h2 text for question
- *     form for answers w/ button to submit form
- */
-function renderQuestion(){
-
-/*  
-*/
-}
-
-/* render feedback page -
- *   event listener for button click
- *   retrieve user input
- *   compare input to correct answer
- *   generate html for feedback ~
- *     h3 text displays if answer was correct
- *     button to continut
- *     .hide to hide button after submit
- */
-function renderFeedback(){
-
-}
-
- /*
-  *repeat render question page and render feedback page untill all questions are answered
-  */
-
-/* render results page -
- *   retrieve number of correct answers
- *   generate results html ~
- *     h1 text for x out of 5 correct
- *     h2 text for great job or try again
- *     try again button
- */
-function renderResults(){
-
-}
 
 /********** TEMPLATE GENERATION FUNCTIONS **********/
 // These functions return HTML templates
+
+//  Title screen -
 function generateTitle(){
+  return `<section>
+      <h2>Welcome to Hogwarts!</h2>
+    </section>
 
+    <section id='title'>
+      <form>
+        <label for="userName">What should I call you, young wizard?</label>
+        <br>
+        <input type="text" id="userName" name="userName" required>
+        <br>
+        <input type= submit id= 'startButton' value='Begin'> 
+      </form>
+    </section>
+
+    <div><img src="images/opener.jpg" alt="Three young wizards facing the camera."></div>`
 }
 
+
+
+
+//  Question screen after quiz has been started
 function generateQuestion(){
+  let question = store.questions[store.questionNumber];
 
+  let answers = question.answers.map((answer, idx) => {
+    if(idx === 0){
+      return `<input type='radio' id=${answer} name='answer' value=${answer} required>
+    <label for='answer${idx}'>${answer}</label>
+    <br>`}
+    return `<input type='radio' id='${answer}' name='answer' value=${answer}>
+    <label for='answer${idx}'>${answer}</label>
+    <br>`
+  });
+
+  return `<section id='questionPage'>
+        <div id= 'progressAndScore'>Question: ${store.questionNumber + 1} of ${store.questions.length}</div
+        <div id= 'score'>Current Score: ${store.score}</div>
+        <h2>${question.question}</h2>
+        <form id='question'>
+          ${answers.join('')}
+          <button id= 'submitAnswer'>Answer</button>
+        </form>
+      </section>`
 }
 
+
+
+//  Feedback screen after question is answered
 function generateFeedback(){
+    let userAnswer = $('input[name="answer"]:checked').attr('id');
+    let correctAnswer = store.questions[store.questionNumber].correctAnswer;
 
+    if ( userAnswer === correctAnswer){
+      store.score ++;
+console.log(store.score);
+    return `<section>
+          <h3 class=yourAnswer'>Well done! See here everyone, ${store.userName}'s done it!</h3>
+          <button id= 'continue'>Continue</button>
+        </section>
+
+        <div><img src="images/correct.jpg" alt="Three young wizards facing the camera."></div>`
+        
+    } else {
+    return `<section>
+          <h3 class='yourAnswer'>Tut, tut. Fame clearly isn't everything...</h3>
+            <h2 class='correctAnswer'>The correct answer is ${store.questions[store.questionNumber].correctAnswer} </h2>
+            <button id= 'continue'>Continue</button>
+        </section>
+
+        <div><img src="images/wrong.jpg" alt="Three young wizards facing the camera."></div>`
+    }
 }
 
+
+//  Results screen after quiz is complete
 function generateResults(){
+console.log('generating results');
+  if (store.score >= 3){
+console.log('more than 3');
+    return `<section id="results">
+    <h2 class='finalResults'>You got ${store.score} out of ${store.questions.length} correct!</h2>
+      <h3 class='howdYouDo'>Yer a WIZARD, ${store.userName}!</h3>
+    <button id='playAgain'>Play Again</button>
+  </section>
 
-}
+  <div><img src="images/win.jpg" alt="Three young wizards facing the camera."></div>`
 
-/********** EVENT HANDLER FUNCTIONS **********
- These functions handle events (submit, click, etc) */
+  } else {
+console.log('bad score');
+    return `<section id="results">
+        <h2 class='finalResults'>You got ${store.score} out of ${store.questions.length} correct!</h2>
+          <h3 class='howdYouDo'>Let me guess -- you're secretly a wizard who was raised by muggles?</h3>
+        <button id= 'playAgain'>Play Again</button>
+      </section>
 
-function handleClick(){
-
-}
-
-function handleSubmit(){
-
-}
-
-function main(){
-
+      <div><img src="images/lose.jfif" alt="Three young wizards facing the camera."></div>`
   }
+}
 
-  $(main)
+/********** EVENT HANDLER FUNCTIONS **********/
+//these functions listen for events and run appropriate generation functions
+
+function handleStart(){
+  $('main').on('click', '#startButton', function(event){
+    event.preventDefault();
+
+    store.quizStarted = true;
+
+    store.userName = $('input[type="text"]').val();
+console.log('start clicked')
+    render();
+  });
+}
+
+function handleAnswer(){
+  $('main').on('submit', '#question', function(event){
+    event.preventDefault();
+console.log('submit clicked');
+let userAnswer = $('input[name="answer"]:checked').attr('id');
+let currentQuestion= store.questionNumber;
+let correctAnswer = store.questions[store.questionNumber].correctAnswer;
+console.log(`on question ${currentQuestion}`);
+console.log(`${store.userName} selected ${userAnswer}, the correct answer was ${correctAnswer}`);
+    store.activateFeedback = true;
+    render();
+  });
+}
+
+function handleContinue(){
+  $('main').on('click', '#continue', function(event){
+    event.preventDefault();
+console.log('continue clicked');
+     store.questionNumber++;
+     store.activateFeedback = false;
+    render();
+  });
+}
+
+function handleReplay(){
+  $('main').on('click', '#playAgain', function(event){
+    event.preventDefault();
+console.log('resetting');
+
+    store.quizStarted= false,
+    store.questionNumber= 0,
+    store.score= 0,
+    store.userName= '',
+    store.activateFeedback= false;
+
+    render();
+  });
+}
+
+/********** RENDER FUNCTION **********/
+//This function conditionally replaces the contents of the <main> tag based on the state of the store
+
+function render(){
+console.log('render ran')
+  let html = '';
+  if (store.quizStarted === false){
+    html = generateTitle();
+console.log('generateTitle');
+
+  } else if (store.quizStarted === true && store.activateFeedback === false && store.questionNumber < store.questions.length){
+    html = generateQuestion();
+console.log('generateQuestion');
+
+  } else if (store.activateFeedback === true){
+    html = generateFeedback();
+console.log('generateFeedback');
+  
+  } else if (store.quizStarted === true && store.questionNumber === store.questions.length){
+console.log('generateResults');
+    html = generateResults();
+  }
+  
+  $('main').html(html);
+}
+
+
+/*************** PAGE LOAD FUNCTION ***************/
+//this functions runs once the page loads and deploys all other functions
+function main(){
+  render();
+  handleStart();
+  handleContinue();
+  handleAnswer();
+  handleReplay();
+}
+
+$(main);
